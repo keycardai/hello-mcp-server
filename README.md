@@ -1,77 +1,118 @@
-# Hello MCP Server
+# 🔐 Keycard Hello MCP Server
 
-A production-ready MCP (Model Context Protocol) server demonstrating Keycard's authentication and identity capabilities with enterprise-grade observability, testing, and development tooling.
+A **production-ready MCP server** demonstrating OAuth 2.0 authentication with Keycard's Security Token Service (STS). This project showcases best practices for building secure, type-safe, and modular MCP servers with enterprise-grade observability.
 
-## ✨ Features
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-purple)](https://modelcontextprotocol.io/)
+[![OAuth 2.0](https://img.shields.io/badge/OAuth-2.0-orange)](https://oauth.net/2/)
 
-- **🔐 OAuth Authentication**: Integration with Keycard STS for secure authentication
-- **📊 Observability Stack**: OpenTelemetry integration with logs, traces, and metrics
-- **🏗️ Advanced Architecture**: Structured logging, request tracing, and middleware system
-- **🧪 Testing Framework**: Jest with coverage, integration tests, and watch modes
-- **🔧 Code Quality**: Biome for linting, formatting, and code checking
-- **⚡ Development Experience**: Hot reload, path resolution, comprehensive npm scripts
+## 🎯 What This Demonstrates
+
+- **🔒 OAuth 2.0 Authentication** - Secure authentication via Keycard STS
+- **✨ Type Safety** - Full TypeScript with Zod runtime validation
+- **🏗️ Modular Architecture** - Clean separation of concerns for easy extension
+- **🚀 Production Ready** - Error handling, validation, and comprehensive logging
+- **📚 Educational** - Well-documented code showing MCP best practices
+- **🧪 Testing Framework** - Jest with coverage, integration tests, and watch modes
+- **📊 Observability** - OpenTelemetry integration with traces and metrics
 
 ## 🚀 Quick Start
 
-### Prerequisites
+## 🏗️ Architecture
 
-- Node.js 18+ and npm
-- A Keycard account with access to the Console
-- A configured Keycard zone (for authentication)
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Copy environment template
-cp .env.example .env
-
-# Configure your Keycard STS URL in .env
-# Get your zone ID from the Keycard Console > Zone Settings
-KEYCARD_STS_ISSUER_URL=http://your-zone-id.sts.localdev.keycard.sh
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│   Cursor    │───▶│  MCP Server  │───▶│ Keycard STS │
+│    IDE      │    │ (localhost:  │    │             │
+│             │    │     8888)    │    │             │
+└─────────────┘    └──────────────┘    └─────────────┘
+       │                   │                   │
+   OAuth Flow          JWT Validation      Token Issuance
 ```
 
-### Finding Your Zone ID
+### 🔄 Authentication Flow
 
+1. **Cursor** discovers OAuth endpoints from MCP server
+2. **User** authenticates via Keycard STS (redirected to identity provider)
+3. **Keycard STS** issues JWT access tokens
+4. **MCP Server** validates tokens and grants access to tools
+
+### Prerequisites
+
+- **Node.js 18+** and **npm**
+- **Cursor IDE** (or any MCP-compatible client)
+- **Keycard account** with access to the Console
+- **Configured Keycard zone** (for authentication)
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/keycardai/hello-mcp-server.git
+cd hello-mcp-server
+npm install
+```
+
+### 2. Configure Environment
+
+Create a `.env` file:
+
+```bash
+# Required: Your Keycard STS issuer URL
+KEYCARD_STS_ISSUER_URL=http://your-zone-id.sts.localdev.keycard.sh
+
+# Optional: Server configuration
+PORT=8888
+HOST=localhost
+```
+
+💡 **Finding your Zone ID**: 
 1. Log into the [Keycard Console](https://console.keycard.sh)
 2. Navigate to **Zone Settings** 
 3. Copy the **Zone ID** (e.g., `ziu95umjk27g7o55663swjipvd`)
-4. Use it in your STS URL: `http://your-zone-id.sts.localdev.keycard.sh`
+4. Replace `your-zone-id` in your STS URL
 
-> **Note**: The zone ID is a unique identifier for your Keycard zone, not the zone name or label.
+> **Note**: Use the zone ID, not the zone name or label.
 
-### Development
+### 3. Start the Server
 
 ```bash
-# Start development server with hot reload
+# Development mode with auto-reload
 npm run dev
 
-# Run tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run integration tests
-npm run test:integration
-
-# Code quality checks
-npm run lint
-npm run format
-npm run check
+# Production mode
+npm run build && npm start
 ```
 
-### Production
-
-```bash
-# Build the project
-npm run build
-
-# Start production server
-npm start
+You should see:
 ```
+🚀 Keycard Hello MCP Server started!
+🔗 MCP Endpoint: http://localhost:8888/mcp
+🔐 Using Keycard STS Issuer: http://your-zone-id.sts.localdev.keycard.sh
+📋 Available tools: keycard-logo, whoami
+💡 Connect via Cursor IDE or any MCP-compatible client
+```
+
+### 4. Configure Cursor IDE
+
+Add to your Cursor MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "keycard-hello-mcp": {
+      "url": "http://localhost:8888/mcp"
+    }
+  }
+}
+```
+
+### 5. Test Authentication
+
+1. **Restart Cursor** to pick up the new MCP server
+2. **Cursor will show "needs login"** for the server
+3. **Click to authenticate** → complete OAuth flow
+4. **Use the tools**: `keycard-logo`, `whoami`
 
 ## 🛠️ Available Tools
 
