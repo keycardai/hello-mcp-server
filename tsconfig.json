@@ -24,7 +24,7 @@
       "@/observability": ["src/observability"]
     },
     
-    "types": ["node", "jest"],
+    "types": ["node"],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
