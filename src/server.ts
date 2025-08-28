@@ -47,6 +47,9 @@ function createMcpServerForSession(): McpServer {
 export function createApp(): express.Application {
   const app = express();
 
+  // Trust proxy for correct protocol detection behind reverse proxies
+  app.set('trust proxy', true);
+
   // Parse JSON requests
   app.use(express.json());
 
@@ -63,12 +66,6 @@ export function createApp(): express.Application {
           // Use HTTP for local development, HTTPS for production
           const protocol = config.issuerBaseDomain.includes('localdev') ? 'http' : 'https';
           return `${protocol}://${zoneId}.${config.issuerBaseDomain}`;
-        },
-        // Derive resource URL from request
-        resource: (req: express.Request) => {
-          const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
-          const host = req.get('host');
-          return `${protocol}://${host}/hello`;
         }
       },
       scopesSupported: ['mcp:tools'],
