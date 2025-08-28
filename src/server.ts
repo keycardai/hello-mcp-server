@@ -190,6 +190,17 @@ export function createApp(): express.Application {
   // Handle DELETE requests for session termination
   helloRouter.delete("/mcp", authMiddleware, handleSessionRequest);
   
+  // Debug endpoint to check environment
+  app.get('/debug-config', (req, res) => {
+    res.json({
+      NODE_ENV: process.env.NODE_ENV,
+      HOST: process.env.HOST,
+      PORT: process.env.PORT,
+      baseUrl: config.baseUrl,
+      isProduction: process.env.NODE_ENV === "production"
+    });
+  });
+
   // Mount the hello router under /hello
   app.use('/hello', helloRouter);
 
