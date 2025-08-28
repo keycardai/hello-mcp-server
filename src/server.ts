@@ -60,7 +60,9 @@ export function createApp(): express.Application {
         issuer: (req: express.Request) => {
           // Extract zoneId from Host header (e.g., z123.dev.local -> z123)
           const zoneId = req.headers.host?.split('.')[0] || 'default';
-          return `https://${zoneId}.${config.issuerBaseDomain}`;
+          // Use HTTP for local development, HTTPS for production
+          const protocol = config.issuerBaseDomain.includes('localdev') ? 'http' : 'https';
+          return `${protocol}://${zoneId}.${config.issuerBaseDomain}`;
         }
       },
       scopesSupported: ['mcp:tools'],
