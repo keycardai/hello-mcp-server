@@ -35,8 +35,8 @@ export function getConfig(): ServerConfig {
   const PORT = process.env.PORT || "8888";
   const HOST = process.env.HOST || "localhost";
   // Use HTTPS for production, HTTP for local development
-  const ENVIRONMENT = process.env.NODE_ENV || "development";
-  const isProduction = ENVIRONMENT === "production";
+  const NODE_ENV = process.env.NODE_ENV || "development";
+  const isProduction = NODE_ENV === "production";
   const protocol = isProduction ? "https" : "http";
   const BASE_URL = isProduction ? `${protocol}://${HOST}` : `${protocol}://${HOST}:${PORT}`;
   const KEYCARD_STS_ISSUER_URL = process.env.KEYCARD_STS_ISSUER_URL;
