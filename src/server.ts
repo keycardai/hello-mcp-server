@@ -225,13 +225,19 @@ export function startServer(): void {
   app
     .listen(config.port, () => {
       const isMultiTenant = config.issuerBaseDomain && config.mcpBaseDomain;
-      logger.debug("🚀 Keycard Hello MCP Server started!", {
-        endpoint: `${config.baseUrl}/hello/mcp`,
+      const issuer = isMultiTenant ? `https://{zoneId}.${config.issuerBaseDomain}` : config.keycardStsIssuerUrl;
+      
+      // Clean startup messages
+      logger.info("🚀 Keycard Hello MCP Server started!");
+      logger.info(`🔗 MCP Endpoint: ${config.baseUrl}/hello/mcp`);
+      logger.info(`🔐 STS Issuer: ${issuer}`);
+      logger.info(`🛠️  Available Tools: keycard-logo, whoami`);
+      
+      // Detailed debug info
+      logger.debug("Server configuration details", {
         mode: isMultiTenant ? 'multi-tenant' : 'single-tenant',
-        stsIssuer: isMultiTenant ? `https://{zoneId}.${config.issuerBaseDomain}` : config.keycardStsIssuerUrl,
         issuerBaseDomain: isMultiTenant ? config.issuerBaseDomain : undefined,
         mcpBaseDomain: isMultiTenant ? config.mcpBaseDomain : undefined,
-        availableTools: "keycard-logo, whoami",
         architecture: "One MCP server instance per session (prevents race conditions)",
         observabilityEnabled: config.observability.enableOtel,
         environment: config.observability.environment,
