@@ -9,7 +9,7 @@ import { config } from "./config";
 import { createAuthMiddleware } from "./middleware/auth";
 import { httpLoggingMiddleware } from "./middleware/logging";
 import { getLogger } from "./observability/logger";
-import { registerAllTools } from "./tools/index";
+import { registerAllTools, getAvailableToolNames } from "./tools/index";
 import type { McpServer } from "./types/index";
 
 // Create authentication middleware using the local SDK
@@ -231,7 +231,7 @@ export function startServer(): void {
       logger.info("🚀 Keycard Hello MCP Server started!");
       logger.info(`🔗 MCP Endpoint: ${config.baseUrl}/hello/mcp`);
       logger.info(`🔐 STS Issuer: ${issuer}`);
-      logger.info(`🛠️  Available Tools: keycard-logo, whoami`);
+      logger.info(`🛠️  Available Tools: ${getAvailableToolNames().join(", ")}`);
       
       // Detailed debug info
       logger.debug("Server configuration details", {

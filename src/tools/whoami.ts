@@ -1,4 +1,4 @@
-import type { McpServer, AuthenticatedToolHandler } from "../types/index";
+import type { McpServer, AuthenticatedToolHandlerNoArgs } from "../types/index";
 import { parseJWTPayload } from "../types/index";
 
 export function registerWhoamiTool(mcpServer: McpServer): void {
@@ -8,7 +8,7 @@ export function registerWhoamiTool(mcpServer: McpServer): void {
       title: "Who am I?",
       description: "Get detailed information about the authenticated user and their access token",
     },
-    async ({ authInfo }: AuthenticatedToolHandler) => {
+    async ({ authInfo }: AuthenticatedToolHandlerNoArgs) => {
       if (!authInfo) {
         return { 
           content: [{ 
