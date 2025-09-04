@@ -59,7 +59,7 @@ Create a `.env` file:
 
 ```bash
 # Required: Your Keycard STS issuer URL
-KEYCARD_STS_ISSUER_URL=http://your-zone-id.sts.localdev.keycard.sh
+KEYCARD_STS_ISSUER_URL=https://your-zone-id.keycard.cloud
 
 # Optional: Server configuration
 PORT=8888
@@ -67,9 +67,9 @@ HOST=localhost
 ```
 
 💡 **Finding your Zone ID**: 
-1. Log into the [Keycard Console](https://console.keycard.sh)
+1. Log into the [Keycard Console](https://console.keycard.ai)
 2. Navigate to **Zone Settings** 
-3. Copy the **Zone ID** (e.g., `ziu95umjk27g7o55663swjipvd`)
+3. Copy the **Zone ID** (e.g., `j434uokph8th1ia1npxiaykh7p`)
 4. Replace `your-zone-id` in your STS URL
 
 > **Note**: Use the zone ID, not the zone name or label.
@@ -88,9 +88,8 @@ You should see:
 ```
 🚀 Keycard Hello MCP Server started!
 🔗 MCP Endpoint: http://localhost:8888/mcp
-🔐 Using Keycard STS Issuer: http://your-zone-id.sts.localdev.keycard.sh
-📋 Available tools: keycard-logo, whoami
-💡 Connect via Cursor IDE or any MCP-compatible client
+🔐 STS Issuer: https://your-zone-id.keycard.cloud
+🛠️  Available Tools: keycard-logo, whoami
 ```
 
 ### 4. Configure Cursor IDE
@@ -132,13 +131,33 @@ Provides detailed information about the authenticated user including:
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `KEYCARD_STS_ISSUER_URL` | Keycard STS issuer URL (use zone ID from Console) | - | ✅ |
+| `KEYCARD_STS_ISSUER_URL` | Keycard STS issuer URL (single-tenant mode) | - | ✅* |
+| `ISSUER_BASE_DOMAIN` | Base domain for STS (multi-tenant mode) | - | ✅* |
+| `MCP_BASE_DOMAIN` | Base domain for MCP server (multi-tenant mode) | - | ✅* |
 | `PORT` | Server port | `8888` | |
 | `HOST` | Server host | `localhost` | |
 | `LOG_LEVEL` | Logging level | `INFO` | |
 | `ENABLE_OTEL` | Enable OpenTelemetry | `true` | |
 | `OTEL_SERVICE_NAME` | Service name for telemetry | `hello-mcp-server` | |
 | `OTEL_ENVIRONMENT` | Environment for telemetry | `development` | |
+
+*Either `KEYCARD_STS_ISSUER_URL` (single-tenant) OR `ISSUER_BASE_DOMAIN` + `MCP_BASE_DOMAIN` (multi-tenant) is required.
+
+### Multi-Tenant Configuration
+
+For multi-tenant deployments (serving multiple organizations/zones), use these environment variables instead:
+
+```bash
+# Multi-tenant mode
+ISSUER_BASE_DOMAIN=keycard.cloud
+MCP_BASE_DOMAIN=mcp.example.com
+
+# Other configuration
+PORT=8888
+ENABLE_OTEL=true
+```
+
+This enables dynamic issuer discovery based on subdomain routing, allowing one deployment to serve multiple Keycard zones.
 
 ### Observability
 
@@ -209,24 +228,6 @@ npm run check:fix
 ```
 
 ## 🔗 MCP Integration
-
-### Claude Desktop
-
-Add to your Claude Desktop config:
-
-```json
-{
-  "mcpServers": {
-    "hello-mcp": {
-      "command": "node",
-      "args": ["path/to/hello-mcp/dist/index.js"],
-      "env": {
-        "KEYCARD_STS_ISSUER_URL": "http://your-zone-id.sts.localdev.keycard.sh"
-      }
-    }
-  }
-}
-```
 
 ### Cursor IDE
 

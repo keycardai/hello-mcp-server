@@ -54,10 +54,10 @@ export function getConfig(): ServerConfig {
     throw new Error(
       "❌ FATAL: Either KEYCARD_STS_ISSUER_URL (single-tenant) or ISSUER_BASE_DOMAIN + MCP_BASE_DOMAIN (multi-tenant) must be defined.\n" +
         "💡 Single-tenant example:\n" +
-        "   KEYCARD_STS_ISSUER_URL=http://default-zone-abc123.sts.localdev.keycard.sh\n" +
+        "   KEYCARD_STS_ISSUER_URL=https://your-zone-id.keycard.cloud\n" +
         "💡 Multi-tenant example:\n" +
-        "   ISSUER_BASE_DOMAIN=sts.localdev.keycard.sh\n" +
-        "   MCP_BASE_DOMAIN=mcp.localdev.keycard.sh"
+        "   ISSUER_BASE_DOMAIN=keycard.cloud\n" +
+        "   MCP_BASE_DOMAIN=mcp.example.com"
     );
   }
   
@@ -65,8 +65,8 @@ export function getConfig(): ServerConfig {
     throw new Error(
       "❌ FATAL: For multi-tenant mode, both ISSUER_BASE_DOMAIN and MCP_BASE_DOMAIN are required.\n" +
         "💡 Example:\n" +
-        "   ISSUER_BASE_DOMAIN=sts.localdev.keycard.sh\n" +
-        "   MCP_BASE_DOMAIN=mcp.localdev.keycard.sh"
+        "   ISSUER_BASE_DOMAIN=keycard.cloud\n" +
+        "   MCP_BASE_DOMAIN=mcp.example.com"
     );
   }
 
