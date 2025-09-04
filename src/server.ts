@@ -84,14 +84,11 @@ export function createApp(): express.Application {
     app.use(mcpAuthMetadataRouter(singleTenantOptions));
   }
 
-  // Mount all routes under /hello
-  const helloRouter = express.Router();
-  
-  // Add logging middleware for /hello/mcp endpoint
-  helloRouter.use(httpLoggingMiddleware);
+  // Add logging middleware for /mcp endpoint
+  app.use(httpLoggingMiddleware);
 
   // Handle MCP protocol requests
-  helloRouter.post("/mcp", authMiddleware, async (req: express.Request, res: express.Response) => {
+  app.post("/mcp", authMiddleware, async (req: express.Request, res: express.Response) => {
     const { sessionId, logger } = req.context;
 
     logger.debug("Processing MCP request");
@@ -188,13 +185,13 @@ export function createApp(): express.Application {
   };
 
   // Handle GET requests for SSE streams
-  helloRouter.get("/mcp", authMiddleware, handleSessionRequest);
+  app.get("/mcp", authMiddleware, handleSessionRequest);
 
   // Handle DELETE requests for session termination
-  helloRouter.delete("/mcp", authMiddleware, handleSessionRequest);
+  app.delete("/mcp", authMiddleware, handleSessionRequest);
   
   // Debug endpoint to check environment
-  app.get('/debug-config', (req, res) => {
+  app.get('/debug-config', (_req, res) => {
     res.json({
       NODE_ENV: process.env.NODE_ENV,
       HOST: process.env.HOST,
@@ -203,9 +200,6 @@ export function createApp(): express.Application {
       isProduction: process.env.NODE_ENV === "production"
     });
   });
-
-  // Mount the hello router under /hello
-  app.use('/hello', helloRouter);
 
   return app;
 }
@@ -229,7 +223,7 @@ export function startServer(): void {
       
       // Clean startup messages
       logger.info("🚀 Keycard Hello MCP Server started!");
-      logger.info(`🔗 MCP Endpoint: ${config.baseUrl}/hello/mcp`);
+      logger.info(`🔗 MCP Endpoint: ${config.baseUrl}/mcp`);
       logger.info(`🔐 STS Issuer: ${issuer}`);
       logger.info(`🛠️  Available Tools: ${getAvailableToolNames().join(", ")}`);
       
