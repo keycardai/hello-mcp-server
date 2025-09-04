@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { requireBearerAuth } from "@keycardai/mcp-oauth/server/auth/middleware/bearerAuth";
-import { mcpAuthMetadataRouter } from "@keycardai/mcp-oauth/server/auth/router";
+import { requireBearerAuth } from "@keycardlabs/mcp-oauth/server/auth/middleware/bearerAuth";
+import { mcpAuthMetadataRouter, InferredAuthMetadataOptions } from "@keycardlabs/mcp-oauth/server/auth/router";
 import { McpServer as McpServerImpl } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport as StreamableHTTPServerTransportImpl } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
@@ -9,7 +9,7 @@ import { config } from "./config";
 import { createAuthMiddleware } from "./middleware/auth";
 import { httpLoggingMiddleware } from "./middleware/logging";
 import { getLogger } from "./observability/logger";
-import { registerAllTools } from "./tools/index";
+import { registerAllTools, getAvailableToolNames } from "./tools/index";
 import type { McpServer } from "./types/index";
 
 // Create authentication middleware using the local SDK
@@ -47,18 +47,42 @@ function createMcpServerForSession(): McpServer {
 export function createApp(): express.Application {
   const app = express();
 
+  // Trust proxy for correct protocol detection behind reverse proxies
+  app.set('trust proxy', true);
+
   // Parse JSON requests
   app.use(express.json());
 
-  // Add OAuth metadata routes for MCP client discovery
-  // These routes allow MCP clients to discover authentication requirements
-  app.use(
-    mcpAuthMetadataRouter({
-      issuer: config.keycardStsIssuerUrl,
+  // Check if we're in multi-tenant mode
+  const isMultiTenant = config.issuerBaseDomain && config.mcpBaseDomain;
+  
+  if (isMultiTenant) {
+    // Multi-tenant mode: dynamic issuer based on Host header
+    const multiTenantOptions: InferredAuthMetadataOptions = {
+      oauthMetadata: {
+        issuer: (req: express.Request) => {
+          // Extract zoneId from Host header (e.g., z123.dev.local -> z123)
+          const zoneId = req.headers.host?.split('.')[0] || 'default';
+          // Use HTTP for local development, HTTPS for production
+          const protocol = config.issuerBaseDomain.includes('localdev') ? 'http' : 'https';
+          return `${protocol}://${zoneId}.${config.issuerBaseDomain}`;
+        }
+      },
       scopesSupported: ['mcp:tools'],
       resourceName: "Hello MCP Server",
-    })
-  );
+    };
+    app.use(mcpAuthMetadataRouter(multiTenantOptions));
+  } else {
+    // Single-tenant mode: static issuer (backward compatibility)
+    const singleTenantOptions: InferredAuthMetadataOptions = {
+      oauthMetadata: {
+        issuer: config.keycardStsIssuerUrl
+      },
+      scopesSupported: ['mcp:tools'],
+      resourceName: "Hello MCP Server",
+    };
+    app.use(mcpAuthMetadataRouter(singleTenantOptions));
+  }
 
   // Add logging middleware for /mcp endpoint
   app.use(httpLoggingMiddleware);
@@ -165,6 +189,17 @@ export function createApp(): express.Application {
 
   // Handle DELETE requests for session termination
   app.delete("/mcp", authMiddleware, handleSessionRequest);
+  
+  // Debug endpoint to check environment
+  app.get('/debug-config', (_req, res) => {
+    res.json({
+      NODE_ENV: process.env.NODE_ENV,
+      HOST: process.env.HOST,
+      PORT: process.env.PORT,
+      baseUrl: config.baseUrl,
+      isProduction: process.env.NODE_ENV === "production"
+    });
+  });
 
   return app;
 }
@@ -183,12 +218,21 @@ export function startServer(): void {
 
   app
     .listen(config.port, () => {
-      logger.debug("🚀 Keycard Hello MCP Server started!", {
-        endpoint: `${config.baseUrl}/mcp`,
-        stsIssuer: config.keycardStsIssuerUrl,
-        availableTools: "keycard-logo, whoami",
+      const isMultiTenant = config.issuerBaseDomain && config.mcpBaseDomain;
+      const issuer = isMultiTenant ? `https://{zoneId}.${config.issuerBaseDomain}` : config.keycardStsIssuerUrl;
+      
+      // Clean startup messages
+      logger.info("🚀 Keycard Hello MCP Server started!");
+      logger.info(`🔗 MCP Endpoint: ${config.baseUrl}/mcp`);
+      logger.info(`🔐 STS Issuer: ${issuer}`);
+      logger.info(`🛠️  Available Tools: ${getAvailableToolNames().join(", ")}`);
+      
+      // Detailed debug info
+      logger.debug("Server configuration details", {
+        mode: isMultiTenant ? 'multi-tenant' : 'single-tenant',
+        issuerBaseDomain: isMultiTenant ? config.issuerBaseDomain : undefined,
+        mcpBaseDomain: isMultiTenant ? config.mcpBaseDomain : undefined,
         architecture: "One MCP server instance per session (prevents race conditions)",
-        note: "Using local typescript-mcp-sdk until published to npm",
         observabilityEnabled: config.observability.enableOtel,
         environment: config.observability.environment,
       });

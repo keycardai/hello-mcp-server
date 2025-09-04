@@ -47,9 +47,15 @@ function createCleanConsoleLogger() {
         ERROR: "❌",
       }[level] || "📝";
 
-    const attrs = Object.keys(attributes).length > 0 ? ` ${JSON.stringify(attributes)}` : "";
+    // Filter out repetitive base attributes for cleaner output
+    const baseAttributesToFilter = ['service', 'version', 'environment', 'operation'];
+    const filteredAttributes = Object.fromEntries(
+      Object.entries(attributes).filter(([key]) => !baseAttributesToFilter.includes(key))
+    );
+    
+    const attrs = Object.keys(filteredAttributes).length > 0 ? ` ${JSON.stringify(filteredAttributes)}` : "";
 
-    return `${timestamp} ${levelIcon} ${level}: ${message}${attrs}`;
+    return `${timestamp} ${levelIcon} ${message}${attrs}`;
   };
 
   return {
