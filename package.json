@@ -2,7 +2,7 @@
   "name": "hello-mcp",
   "version": "1.0.0",
   "description": "A polished, production-ready MCP server demonstrating Keycard's authentication and identity capabilities.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": "Keycard AI",
   "type": "commonjs",
   "main": "index.js",
