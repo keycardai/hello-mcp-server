@@ -263,4 +263,6 @@ Response:
 
 ## 📄 License
 
-Apache-2.0 License - see LICENSE file for details.
+Apache-2.0 — see [LICENSE](./LICENSE) and, for the copyright notice, [NOTICE](./NOTICE).
+The Keycard name and logo are trademarks; [TRADEMARKS.md](./TRADEMARKS.md) states how
+they may be used.
